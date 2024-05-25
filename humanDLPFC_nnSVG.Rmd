@@ -1,0 +1,375 @@
+# Human DLPFC HVGs vs SVGs from `nnSVG` 
+
+## Required Packages
+```{r include=FALSE}
+library(scater)
+library(scran)
+library(nnSVG)
+library(ggspavis)
+library(dplyr)
+library(tibble)
+library(tidyr)
+```
+
+
+## Data
+
+```{r}
+# Load from datasets folder
+spe <- humanDLPFC
+spe
+```
+
+## QC
+
+```{r}
+# library(scater)
+
+# subset to keep only spots over tissue
+spe <- spe[, colData(spe)$in_tissue == 1]
+
+# identify mitochondrial genes
+is_mito <- grepl("(^MT-)|(^mt-)", rowData(spe)$gene_name)
+
+# calculate per-spot QC metrics and store in colData
+spe <- addPerCellQC(spe, subsets = list(mito = is_mito))
+
+# select QC threshold for library size
+qc_lib_size <- colData(spe)$sum < 600
+colData(spe)$qc_lib_size <- qc_lib_size
+
+# select QC threshold for number of expressed genes
+qc_detected <- colData(spe)$detected < 400
+colData(spe)$qc_detected <- qc_detected
+
+# select QC threshold for mitochondrial read proportion
+qc_mito <- colData(spe)$subsets_mito_percent > 28
+colData(spe)$qc_mito <- qc_mito
+
+# select QC threshold for number of cells per spot
+qc_cell_count <- colData(spe)$cell_count > 10
+colData(spe)$qc_cell_count <- qc_cell_count
+
+# combined set of discarded spots
+discard <- qc_lib_size | qc_detected | qc_mito | qc_cell_count
+# store in object
+colData(spe)$discard <- discard
+
+# remove combined set of low-quality spots
+spe <- spe[, !colData(spe)$discard]
+
+dim(spe)
+```
+
+```{r}
+## View spe after QC
+spe
+```
+
+## Normalization
+
+```{r}
+# library(scran)
+
+# calculate library size factors
+spe <- computeLibraryFactors(spe)
+
+hist(sizeFactors(spe), breaks = 20)
+```
+
+```{r}
+spe <-  logNormCounts(spe)
+```
+
+
+## Feature selection 
+
+
+```{r}
+# remove mitochondrial genes
+spe <- spe[!is_mito, ]
+```
+
+
+### SVGs (`nnSVG`)
+
+#### SUBSAMPLE FOR FASTER RUN TIME - USE FULL SAMPLE ON `SCC`!!!!! & USE DEFAULT FILTERING FOR FULL ANALYSIS!!!!
+```{r}
+# library(nnSVG)
+
+# subsample spots for faster runtime in this example
+# note: skip this step in full analysis
+n <- 100
+set.seed(123)
+ix <- sample(seq_len(n), n)
+spe_nnSVG <- spe[, ix]
+
+# filter low-expressed and mitochondrial genes
+# using stringent filtering for faster runtime in this example
+# note: use default filtering in full analysis
+spe_nnSVG <- filter_genes(
+  spe_nnSVG, filter_genes_ncounts = 10, filter_genes_pcspots = 3
+)
+```
+
+
+```{r}
+# library(nnSVG)
+
+# re-calculate logcounts after filtering
+spe_nnSVG <- logNormCounts(spe_nnSVG)
+```
+
+
+```{r}
+# run nnSVG
+set.seed(123)
+spe_nnSVG <- nnSVG(spe_nnSVG)
+```
+
+  - started around 12:45ish?, ended 12:48
+  
+```{r}
+# show results for top n SVGs
+rowData(spe_nnSVG)[order(rowData(spe_nnSVG)$rank)[1:6], ]
+```
+  
+```{r}
+nrow(rowData(spe_nnSVG)[rowData(spe_nnSVG)$padj<0.05,])
+```
+
+
+### HVGs
+
+```{r}
+spe_HVG <- logNormCounts(spe_nnSVG)
+```
+
+```{r}
+#mlibrary(scran)
+
+# fit mean-variance relationship
+dec <- modelGeneVar(spe_HVG)
+
+# select top HVGs
+dim(spe_HVG)
+top_hvgs <- getTopHVGs(dec, prop = 0.1)
+length(top_hvgs)
+```
+
+```{r}
+dec <- dec[order(dec$p.value),]
+n <- nrow(dec)
+dec$rank <- 1:n
+head(dec)
+```
+
+
+```{r}
+spe_topHVGs <- spe_HVG[rowData(spe_HVG)$gene_id %in% top_hvgs,]
+```
+
+```{r}
+spe_topHVGs
+```
+
+### How many genes are both SVGs and HVGs
+
+```{r}
+intersect(rowData(spe_nnSVG)$gene_id, rowData(spe_topHVGs)$gene_id)
+```
+
+
+### Correlation between Ranks
+
+```{r}
+hvg_ranks <- as.data.frame(dec) %>% rownames_to_column(var = "gene_id") %>% select(gene_id, rank)
+
+svg_ranks <- as.data.frame(rowData(spe_nnSVG)) %>% select(gene_id, rank, gene_name)
+
+rank_df <- merge(hvg_ranks, svg_ranks, by = "gene_id", suffixes = c("_hvgs", "_svgs"))
+head(rank_df)
+```
+
+
+```{r}
+# plot
+ggplot(rank_df, aes(x=rank_hvgs, y=rank_svgs)) +
+  geom_point() +
+  smplot2::sm_statCorr(color = 'dodgerblue', corr_method = 'spearman')
+```
+
+
+### Proportion overlap of top _n_ ranked highly vs spatially VGs
+
+  - 10, 20, 30, 40, 50
+
+
+```{r}
+#res_nnSVG <- as.data.frame(rowData(spe_nnSVG)) %>% arrange(rank) %>% 
+
+res_list <- list(
+  humanDLPFC_nnSVG = rowData(spe_nnSVG), 
+  humanDLPFC_HVGs = dec
+)
+
+# add method names to all columns except gene IDs and gene names
+colnames(res_list[["humanDLPFC_nnSVG"]])[-(1:2)] <- paste0(colnames(res_list[["humanDLPFC_nnSVG"]]), "_nnSVG")[-(1:2)]
+colnames(res_list[["humanDLPFC_HVGs"]])[-(1:2)] <- paste0(colnames(res_list[["humanDLPFC_HVGs"]]), "_HVGs")[-(1:2)]
+
+```
+
+
+
+```{r}
+overlaps <- c(10, 20, 30, 40, 50)
+```
+
+
+`calc_overlaps`
+```{r}
+calc_overlaps <- function(method1, method2) {
+  
+  res_method1 <- res_list[[method1]]
+  res_method2 <- res_list[[method2]]
+  
+  # remove method names from column names
+  colnames(res_method1)[-(1:2)] <- gsub("_.*$", "", colnames(res_method1)[-(1:2)])
+  colnames(res_method2)[-(1:2)] <- gsub("_.*$", "", colnames(res_method2)[-(1:2)])
+  
+  top_method2 <- rep(NA, length(overlaps))
+  
+  for (k in seq_along(overlaps)) {
+    # select top gene IDs from method 1
+    genes_k <- rownames(filter(as.data.frame(res_method1), 
+                               rank <= overlaps[k]))
+    # calculate overlaps
+    top_method2[k] <- nrow(filter(as.data.frame(na.omit(res_method2[genes_k, ])), 
+                                  rank <= overlaps[k]))
+  }
+  
+  # calculate proportions
+  return(top_method2 / overlaps)
+}
+```
+
+```{r}
+df_overlaps <- data.frame(
+  top_n = overlaps, 
+  dataset = "humanDLPFC", 
+  nnSVG = calc_overlaps("humanDLPFC_HVGs", "humanDLPFC_nnSVG")
+)
+
+df_overlaps <- 
+  pivot_longer(df_overlaps, cols = "nnSVG", 
+               names_to = "method", values_to = "proportion")
+
+```
+
+```{r}
+ggplot(as.data.frame(df_overlaps), 
+       aes(x = top_n, y = proportion)) + 
+  geom_line(lwd = 0.75) + 
+  geom_point(size = 2) + 
+  scale_x_continuous(breaks = overlaps) + 
+  ylim(c(0, 1)) + 
+  xlab("top n genes") + 
+  ylab("proportion overlap") + 
+  ggtitle("Overlap SVGs and HVGs: human DLPFC") + 
+  theme_bw() + 
+  theme(panel.grid.minor = element_blank())
+```
+
+
+
+## Dimensionality Reduction
+
+
+### SVGs
+
+```{r}
+# library(scater)
+
+# compute PCA
+set.seed(123)
+spe_nnSVG <- runPCA(spe_nnSVG, ncomponents=2)
+
+reducedDimNames(spe_nnSVG)
+```
+
+
+### HVGs
+
+```{r}
+# library(scater)
+
+# compute PCA
+set.seed(123)
+spe_topHVGs <- runPCA(spe_HVG, ncomponents = 2, subset_row = top_hvgs)
+
+reducedDimNames(spe_topHVGs)
+```
+
+
+```{r}
+# library(ggspavis)
+# plot top 2 PCA dimensions
+plotDimRed(spe_topHVGs, plot_type = "PCA")
+```
+
+
+## Clustering
+
+### SVGs
+
+```{r}
+# graph-based clustering
+set.seed(123)
+k <- 10
+g <- buildSNNGraph(spe_nnSVG, k = k, use.dimred = "PCA")
+g_walk <- igraph::cluster_walktrap(g)
+clus <- g_walk$membership
+table(clus)
+```
+
+```{r}
+# store cluster labels in column 'label' in colData
+colLabels(spe_nnSVG) <- factor(clus)
+```
+
+
+```{r}
+# plot clusters in spatial x-y coordinates
+plotSpots(spe_nnSVG, annotate = "label", 
+          pal = "libd_layer_colors")
+```
+
+
+### HVGs
+
+```{r}
+# graph-based clustering
+set.seed(123)
+k <- 10
+g <- buildSNNGraph(spe_topHVGs, k = k, use.dimred = "PCA")
+g_walk <- igraph::cluster_walktrap(g)
+clus <- g_walk$membership
+table(clus)
+```
+
+```{r}
+# store cluster labels in column 'label' in colData
+colLabels(spe_topHVGs) <- factor(clus)
+```
+
+
+```{r}
+# plot clusters in spatial x-y coordinates
+plotSpots(spe_topHVGs, annotate = "label", 
+          pal = "libd_layer_colors")
+```
+
+
+### Clustering performance metrics
+
+
