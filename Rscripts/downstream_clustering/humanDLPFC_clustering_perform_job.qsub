@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project name
+#$ -P weber-lr
+
+# job name
+#$ -N humanDLPFC_clust_perform
+
+# combine error with outputs
+#$ -j y
+
+# email
+#$ -m ea
+
+# memory per core
+#$ -l mem_per_core=6G
+
+# number of cores
+#$ -pe omp 1
+
+module load R/4.4.0
+Rscript humanDLPFC_clustering_performance.R

@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job
+#$ -N humanDLPFC_noFilt
+
+# combine error and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# memory per core
+#$ -l mem_per_core=6G
+
+# number of cores
+#$ -pe omp 1
+
+module load R/4.4.0
+Rscript humanDLPFC_noFilt.R

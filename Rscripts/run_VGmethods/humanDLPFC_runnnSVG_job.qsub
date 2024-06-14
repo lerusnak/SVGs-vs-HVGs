@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project name
+#$ -P weber-lr
+
+# job name
+#$ -N humanDLPFC_runnnSVG
+
+# combine error and outputs
+#$ -j y
+
+# email when done
+#$ -m ea
+
+# memory per core
+#$ -l mem_per_core=6G
+
+# number of cores
+#$ -pe omp 10
+
+module load R/4.4.0
+Rscript humanDLPFC_runnnSVG_noFilt.R
