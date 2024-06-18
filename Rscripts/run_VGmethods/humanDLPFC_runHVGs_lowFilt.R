@@ -1,12 +1,12 @@
 #####################
 #     Run Method    #
-#   Method: nnSVG   #
+#    Method: HVGs   #
 # Data: Human DLPFC #
 #####################
 
 # Packages
 library(SpatialExperiment)
-library(nnSVG)
+library(scran)
 library(here)
 
 
@@ -14,10 +14,8 @@ library(here)
 #  Load Data   #
 ################
 
-fn <- here("/projectnb/weber-lr/lerusnak/outputs/humanDLPFC_noFilt.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/humanDLPFC_lowFilt.rds")
 spe <- readRDS(fn)
-
-assayNames(spe)
 
 
 ################
@@ -26,14 +24,19 @@ assayNames(spe)
 
 # run method and save results, runtime, peak memory usage
 
-# run nnSVG with default parameters (except increasing cores to 10 (n_threads))
-
-# NOTE: NO ADDITIONAL FILTERING WAS PERFORMED WHEN RUNNING THIS METHOD #
+# run HVGs
 
 set.seed(123)
 runtime <- system.time({
-  spe <- nnSVG(spe, n_threads = 10)
+  dec <- modelGeneVar(spe)
 })
+
+# store in object
+stopifnot(all(rownames(dec) == rowData(spe)$gene_id))
+rowData(spe) <- cbind(rowData(spe), dec)
+
+# calculate ranks
+rowData(spe)$rank <- rank(-1 * rowData(spe)$bio, ties.method = "first")
 
 # store runtime in object
 metadata(spe) <- list(
@@ -45,5 +48,5 @@ metadata(spe) <- list(
 # save object #
 ###############
 
-file <- here("/projectnb/weber-lr/lerusnak/outputs", "spe_humanDLPFC_nnSVG_noFilt.rds")
+file <- here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs", "spe_humanDLPFC_HVGs_lowFilt.rds")
 saveRDS(spe, file = file)

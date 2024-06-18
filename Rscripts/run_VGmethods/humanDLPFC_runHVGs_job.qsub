@@ -4,7 +4,7 @@
 #$ -P weber-lr
 
 # Job name
-#$ -N humanDLPFC_runHVGs
+#$ -N humanDLPFC_runHVGs_lowFilt
 
 # combine error and output streams
 #$ -j y
@@ -19,4 +19,4 @@
 #$ -pe omp 1
 
 module load R/4.4.0
-Rscript humanDLPFC_runHVGs.R
+Rscript humanDLPFC_runHVGs_lowFilt.R

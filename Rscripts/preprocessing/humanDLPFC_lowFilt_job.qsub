@@ -4,7 +4,7 @@
 #$ -P weber-lr
 
 # job
-#$ -N humanDLPFC_noFilt
+#$ -N humanDLPFC_lowFilt
 
 # combine error and outs
 #$ -j y
@@ -19,4 +19,4 @@
 #$ -pe omp 1
 
 module load R/4.4.0
-Rscript humanDLPFC_noFilt.R
+Rscript humanDLPFC_lowFilt.R

@@ -9,7 +9,6 @@ library(SpatialExperiment)
 library(STexampleData)
 library(scater)
 library(scran)
-library(scry)
 library(here)
 
 
@@ -45,8 +44,13 @@ dim(spe)
 
 
 # filter zero-expressed genes
-is_zero <- rowSums(counts(spe)) == 0
-spe <- spe[!is_zero, ]
+# is_zero <- rowSums(counts(spe)) == 0
+# spe <- spe[!is_zero, ]
+
+# filter low-expressed genes
+is_low <- rowSums(counts(spe)) <= 20
+table(is_low)
+spe <- spe[!is_low,]
 
 dim(spe)
 
@@ -64,5 +68,5 @@ spe
 # Save as .rds data #
 #####################
 
-fn <- here("/projectnb/weber-lr/lerusnak/outputs/humanDLPFC_noFilt.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/humanDLPFC_lowFilt.rds")
 saveRDS(spe, file = fn)

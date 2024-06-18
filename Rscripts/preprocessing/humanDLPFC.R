@@ -52,5 +52,5 @@ assayNames(spe)
 # save object
 # -----------
 
-fn <- here("/projectnb/weber-lr/lerusnak/outputs", "spe_humanDLPFC_preprocessed.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs", "spe_humanDLPFC_preprocessed.rds")
 saveRDS(spe, file = fn)

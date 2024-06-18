@@ -4,7 +4,7 @@
 #$ -P weber-lr
 
 # job name
-#$ -N humanDLPFC_runnnSVG
+#$ -N humanDLPFC_runnnSVG_lowFilt
 
 # combine error and outputs
 #$ -j y
@@ -19,4 +19,4 @@
 #$ -pe omp 10
 
 module load R/4.4.0
-Rscript humanDLPFC_runnnSVG_noFilt.R
+Rscript humanDLPFC_runnnSVG_lowFilt.R

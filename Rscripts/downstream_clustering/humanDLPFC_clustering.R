@@ -24,13 +24,13 @@ library(scran)
 
 # note choice of filtering per method
 spe_list <- list(
-  humanDLPFC_HVGs = readRDS(here("/projectnb/weber-lr/lerusnak/outputs/spe_humanDLPFC_HVGs_noFilt.rds")),
-  humanDLPFC_nnSVG = readRDS(here("/projectnb/weber-lr/lerusnak/outputs/spe_humanDLPFC_nnSVG.rds"))
+  humanDLPFC_HVGs = readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/spe_humanDLPFC_HVGs_lowFilt.rds")),
+  humanDLPFC_nnSVG = readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/spe_humanDLPFC_nnSVG_lowFilt.rds"))
 )
 
 res_list <- list(
-  humanDLPFC_nnSVG = rowData(readRDS(here("/projectnb/weber-lr/lerusnak/outputs/spe_humanDLPFC_nnSVG.rds"))),
-  humanDLPFC_HVGs = rowData(readRDS(here("/projectnb/weber-lr/lerusnak/outputs/spe_humanDLPFC_HVGs_noFilt.rds"))))
+  humanDLPFC_nnSVG = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/spe_humanDLPFC_nnSVG_lowFilt.rds"))),
+  humanDLPFC_HVGs = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/spe_humanDLPFC_HVGs_lowFilt.rds"))))
 
 # add method names to all columns except gene IDs and gene names
 colnames(res_list[["humanDLPFC_nnSVG"]])[-(1:2)] <- paste0(colnames(res_list[["humanDLPFC_nnSVG"]]), "_nnSVG")[-(1:2)]
@@ -74,7 +74,7 @@ colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
 
 # graph-based clustering
 set.seed(123)
-g <- buildSNNGraph(spe, k = 10, use.dimred = "PCA")
+g <- buildSNNGraph(spe, k = 25, use.dimred = "PCA")
 g_walk <- igraph::cluster_walktrap(g)
 clus <- g_walk$membership
 colLabels(spe) <- factor(clus)
@@ -147,7 +147,7 @@ res_out <- list(
 )
 
 
-fn <- here("/projectnb/weber-lr/lerusnak/outputs/res_downstream_clustering.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/res_downstream_clustering.rds")
 saveRDS(res_out, file = fn)
 
 

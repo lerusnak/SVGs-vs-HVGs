@@ -13,6 +13,7 @@ library(SpatialExperiment)
 library(here)
 library(mclust)
 library(ggplot2)
+library(ggspavis)
 library(readr)
 
 
@@ -21,8 +22,8 @@ library(readr)
 ###############
 
 # directories
-clustering_dir <- here('/projectnb/weber-lr/lerusnak/outputs')
-plots_dir <- here('/projectnb/weber-lr/lerusnak/plots/clustering')
+clustering_dir <- here('/projectnb/weber-lr/SVGs-vs-HVGs/outputs')
+plots_dir <- here('/projectnb/weber-lr/SVGs-vs-HVGs/plots/clustering')
 
 # load data from clustering
 fn <- here(clustering_dir, 'res_downstream_clustering.rds')
@@ -41,11 +42,11 @@ names(spatialcoords_out)
 
 # match clusters to ground truth layers for each method
 
-match_HVGs <- c(1, 8, 2, 4, 3, 6, 7, 5)
+match_HVGs <- c(1, 5, 4, 6, 8, 2, 3, 7)
 coldata_out$HVGs$label <- factor(
   coldata_out$HVGs$label, levels = match_HVGs)
 
-match_nnSVG <- c(5, 8, 1, 7, 2, 6, 3, 4)
+match_nnSVG <- c(3, 1, 7, 5, 2, 6, 4, 8)
 coldata_out$nnSVG$label <- factor(
   coldata_out$nnSVG$label, levels = match_nnSVG)
 
@@ -84,6 +85,17 @@ for (i in seq_along(coldata_out)) {
 }
 
 
+## Ground Truth plot
+
+spe <- readRDS("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/humanDLPFC_lowFilt.rds")
+
+# plot ground truth labels in spatial 
+xyplot_groundtruth <- plotSpots(spe, annotate = "ground_truth", 
+                                pal = "libd_layer_colors",
+                                point_size = 0.7) 
+ggsave("xyplot_groundtruth.png", path = "/projectnb/weber-lr/SVGs-vs-HVGs/plots/clustering")
+
+
 ###########
 #   ARI   #
 ###########
@@ -91,11 +103,11 @@ for (i in seq_along(coldata_out)) {
 # re-label factor levels combine clusters 7 and 8 into a single cluster
 # representing white matter
 
-coldata_out$HVGs$label <- factor(
-  coldata_out$HVGs$label, labels = c(paste0("Layer", 1:6), rep("WM", 2)))
+ coldata_out$HVGs$label <- factor(
+  coldata_out$HVGs$label, labels = c("WM", "Layer6", "Layer2", "Layer5", "WM", "Layer4", "Layer1", "Layer3"))
 
-coldata_out$nnSVG$label <- factor(
-  coldata_out$nnSVG$label, labels = c(paste0("Layer", 1:6), rep("WM", 2)))
+ coldata_out$nnSVG$label <- factor(
+  coldata_out$nnSVG$label, labels = c("WM", "Layer3", "WM", "Layer1", "Layer4", "Layer6", "Layer5", "Layer2"))
 
 
 # calculate adjusted rand index
@@ -116,7 +128,7 @@ df <- data.frame(
 
 df
 
-write_tsv(df, file = "/projectnb/weber-lr/lerusnak/plots/clustering/ari_table.tsv")
+write_tsv(df, file = "/projectnb/weber-lr/SVGs-vs-HVGs/plots/clustering/ari_table.tsv")
 
 pal_methods <- c("blue3", "deepskyblue2")
 
