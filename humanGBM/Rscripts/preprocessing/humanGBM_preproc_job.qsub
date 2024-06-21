@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project name
+#$ -P weber-lr
+
+# job name
+#$ -N humanGBM_preproc
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# cores
+#$ -pe omp 1
+
+# mem per core
+#$ -l mem_per_core=6G
+
+module load R/4.4.0
+Rscript humanGBM_lowFilt.R

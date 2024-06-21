@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job
+#$ -N humanGBM_HVGs
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# cores
+#$ -pe omp 1
+
+# mem per core
+#$ -l mem_per_core=6G
+
+module load R/4.4.0
+Rscript humanGBM_runHVGs.R
