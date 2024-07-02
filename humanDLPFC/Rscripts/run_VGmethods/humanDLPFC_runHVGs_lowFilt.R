@@ -14,7 +14,7 @@ library(here)
 #  Load Data   #
 ################
 
-fn <- here("/projectnb/weber-lr/lerusnak/outputs/spe_humanDLPFC_preprocessed.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/humanDLPFC_lowFilt.rds")
 spe <- readRDS(fn)
 
 
@@ -48,5 +48,5 @@ metadata(spe) <- list(
 # save object #
 ###############
 
-file <- here("/projectnb/weber-lr/lerusnak/outputs", "spe_humanDLPFC_HVGs_noFilt.rds")
+file <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs", "spe_humanDLPFC_HVGs_lowFilt.rds")
 saveRDS(spe, file = file)

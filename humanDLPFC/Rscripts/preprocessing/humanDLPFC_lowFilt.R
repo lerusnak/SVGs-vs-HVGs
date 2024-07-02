@@ -68,5 +68,5 @@ spe
 # Save as .rds data #
 #####################
 
-fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/humanDLPFC_lowFilt.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/humanDLPFC_lowFilt.rds")
 saveRDS(spe, file = fn)

@@ -19,5 +19,5 @@
 #$ -l mem_per_core=6G
 
 module load R/4.4.0
-Rscript humanGBM_loadData.R
+Rscript humanGBM_data.R
 

@@ -22,8 +22,8 @@ library(readr)
 ###############
 
 # directories
-clustering_dir <- here('/projectnb/weber-lr/SVGs-vs-HVGs/outputs')
-plots_dir <- here('/projectnb/weber-lr/SVGs-vs-HVGs/plots/clustering')
+clustering_dir <- here('/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs')
+plots_dir <- here('/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/plots/clustering')
 
 # load data from clustering
 fn <- here(clustering_dir, 'res_downstream_clustering.rds')
@@ -42,11 +42,11 @@ names(spatialcoords_out)
 
 # match clusters to ground truth layers for each method
 
-match_HVGs <- c(1, 5, 4, 6, 8, 2, 3, 7)
+match_HVGs <- c(2, 4, 6, 3, 8, 7, 1, 5)
 coldata_out$HVGs$label <- factor(
   coldata_out$HVGs$label, levels = match_HVGs)
 
-match_nnSVG <- c(3, 1, 7, 5, 2, 6, 4, 8)
+match_nnSVG <- c(6, 7, 5, 8, 2, 4, 3, 1)
 coldata_out$nnSVG$label <- factor(
   coldata_out$nnSVG$label, levels = match_nnSVG)
 
@@ -87,13 +87,13 @@ for (i in seq_along(coldata_out)) {
 
 ## Ground Truth plot
 
-spe <- readRDS("/projectnb/weber-lr/SVGs-vs-HVGs/outputs/humanDLPFC_lowFilt.rds")
+spe <- readRDS("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/humanDLPFC_lowFilt.rds")
 
 # plot ground truth labels in spatial 
 xyplot_groundtruth <- plotSpots(spe, annotate = "ground_truth", 
                                 pal = "libd_layer_colors",
                                 point_size = 0.7) 
-ggsave("xyplot_groundtruth.png", path = "/projectnb/weber-lr/SVGs-vs-HVGs/plots/clustering")
+ggsave("xyplot_groundtruth.png", path = "/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/plots/clustering")
 
 
 ###########
@@ -128,7 +128,7 @@ df <- data.frame(
 
 df
 
-write_tsv(df, file = "/projectnb/weber-lr/SVGs-vs-HVGs/plots/clustering/ari_table.tsv")
+write_tsv(df, file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/plots/clustering/ari_table.tsv")
 
 pal_methods <- c("blue3", "deepskyblue2")
 
