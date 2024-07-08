@@ -1,0 +1,16 @@
+#!/bin/bash -l
+
+# project 
+#$ -P weber-lr
+
+# name
+#$ -N mouseEmbryo_HVGs
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+module load R/4.4.0
+Rscript mouseEmbryo_runHVGs.R

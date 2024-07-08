@@ -12,10 +12,9 @@
 
 library(SpatialExperiment)
 library(here)
+library(tidyverse)
 library(mclust)
-library(ggplot2)
 library(ggspavis)
-library(readr)
 
 
 ###############
@@ -160,11 +159,11 @@ ggsave("xyplot_trueMPs.png", path = "/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/p
 
 # calculate adjusted rand index
 
-ari_HVGs_mps <- adjustedRandIndex(VGs_df[[1]]$label, 
-                                  VGs_df[[1]]$mp)
+ari_HVGs_mps <- round(adjustedRandIndex(VGs_df[[1]]$label, 
+                                  VGs_df[[1]]$mp))
 
-ari_nnSVG_mps <- adjustedRandIndex(VGs_df[[2]]$label, 
-                                   VGs_df[[2]]$mp)
+ari_nnSVG_mps <- round(adjustedRandIndex(VGs_df[[2]]$label, 
+                                   VGs_df[[2]]$mp))
 
 
 # plot adjusted Rand index

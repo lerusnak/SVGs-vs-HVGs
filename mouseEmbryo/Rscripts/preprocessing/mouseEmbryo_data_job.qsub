@@ -1,10 +1,10 @@
 #!/bin/bash -l
 
-# project
+# project 
 #$ -P weber-lr
 
-# job
-#$ -N humanGBM_clustperform
+# job 
+#$ -N mouseEmbryo_data
 
 # combine errors and outs
 #$ -j y
@@ -13,4 +13,4 @@
 #$ -m ea
 
 module load R/4.4.0
-Rscript humanGBM_clust_performance.R
+Rscript humanDLPFC_data.R

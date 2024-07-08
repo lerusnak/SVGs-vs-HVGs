@@ -1,16 +1,16 @@
 #!/bin/bash -l
 
-# project
+# project 
 #$ -P weber-lr
 
 # job
-#$ -N humanGBM_clustering
+#$ -N GBM_mp_clust
 
 # combine errors and outs
-#$ -j y
+# -j y
 
 # email
-# -m ea
+#$ -m ea
 
 module load R/4.4.0
-Rscript humanGBM_clustering.R
+Rscript humanGBM_clustering_layers.R

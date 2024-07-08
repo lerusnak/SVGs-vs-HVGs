@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job
+#$ -N mouseEmbryo_nnSVG
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# mem per core
+#$ -l mem_per_core=6G
+
+# number of cores
+#$ -pe omp 10
+
+module load R/4.4.0
+Rscript mouseEmbryo_runnnSVG.R

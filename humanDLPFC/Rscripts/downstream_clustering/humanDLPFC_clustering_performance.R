@@ -112,11 +112,11 @@ ggsave("xyplot_groundtruth.png", path = "/projectnb/weber-lr/SVGs-vs-HVGs/humanD
 
 # calculate adjusted rand index
 
-ari_HVGs <- adjustedRandIndex(coldata_out$HVGs$label, 
-                              coldata_out$HVGs$ground_truth)
+ari_HVGs <- round(adjustedRandIndex(coldata_out$HVGs$label, 
+                              coldata_out$HVGs$ground_truth), 4)
 
-ari_nnSVG <- adjustedRandIndex(coldata_out$nnSVG$label, 
-                               coldata_out$nnSVG$ground_truth)
+ari_nnSVG <- round(adjustedRandIndex(coldata_out$nnSVG$label, 
+                               coldata_out$nnSVG$ground_truth), 4)
 
 
 # plot adjusted Rand index
