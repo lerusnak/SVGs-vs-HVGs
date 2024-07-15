@@ -4,6 +4,7 @@
 
 library(SpatialExperiment)
 library(readr)
+library(dplyr)
 
 
 # ---------
@@ -53,20 +54,11 @@ file <- file.path(dir_data, "GSM5915040_201104_07_matched_bead_locations.txt.gz"
 
 bead_locations <- read_tsv(file, col_names = FALSE)
 
-##### maybe not #####
-#bead_locations_colnames1 <- strsplit(readLines(file, n = 5), "\t")
-#bead_locations_colnames <- unlist(strsplit(readLines(file), "\t"))
-#bead_locations <- read_csv(file, col_names = FALSE)
-#colnames(bead_locations) <- bead_locations_colnames
-#####################
 
 dim(bead_locations)
 head(bead_locations)
 
 stopifnot(nrow(bead_locations) == ncol(exprs))
-stopifnot(all(bead_ids == bead_locations$barcodes))
-
-
 
 
 # ------------------------

@@ -1,0 +1,16 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job
+#$  -N mouseEmb_clust_sub
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+module load R/4.4.0
+Rscript clustering_subset.R

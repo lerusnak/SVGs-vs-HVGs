@@ -1,7 +1,7 @@
 ############################
-#        human DLPFC       #
+#       mouse Embryo       #
 # dimensionality reduction #
-#        & clustering      #
+#       & clustering       #
 ############################
 
 
@@ -24,22 +24,22 @@ library(scran)
 
 # note choice of filtering per method
 spe_list <- list(
-  humanDLPFC_HVGs = readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_HVGs_lowFilt.rds")),
-  humanDLPFC_nnSVG = readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_nnSVG_lowFilt.rds"))
+  mouseEmbryo_HVGs = readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/mouseEmbryo/outputs/spe_mouseEmbryo_HVGs.rds")),
+  mouseEmbryo_nnSVG = readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/mouseEmbryo/outputs/spe_mouseEmbryo_nnSVG.rds"))
 )
 
 res_list <- list(
-  humanDLPFC_nnSVG = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_nnSVG_lowFilt.rds"))),
-  humanDLPFC_HVGs = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_HVGs_lowFilt.rds"))))
+  mouseEmbryo_nnSVG = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/mouseEmbryo/outputs/spe_mouseEmbryo_nnSVG.rds"))),
+  mouseEmbryo_HVGs = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/mouseEmbryo/outputs/spe_mouseEmbryo_HVGs.rds"))))
 
 # add method names to all columns except gene IDs and gene names
-colnames(res_list[["humanDLPFC_nnSVG"]])[-(1:2)] <- paste0(colnames(res_list[["humanDLPFC_nnSVG"]]), "_nnSVG")[-(1:2)]
-colnames(res_list[["humanDLPFC_HVGs"]])[-(1:2)] <- paste0(colnames(res_list[["humanDLPFC_HVGs"]]), "_HVGs")[-(1:2)]
+colnames(res_list[["mouseEmbryo_nnSVG"]])[-(1:2)] <- paste0(colnames(res_list[["mouseEmbryo_nnSVG"]]), "_nnSVG")[-(1:2)]
+colnames(res_list[["mouseEmbryo_HVGs"]])[-(1:2)] <- paste0(colnames(res_list[["mouseEmbryo_HVGs"]]), "_HVGs")[-(1:2)]
 
 
 # note filtering per method
 
-table(res_list$humanDLPFC_HVGs$gene_id %in% res_list$humanDLPFC_nnSVG$gene_id)
+table(res_list$mouseEmbryo_HVGs$gene_name %in% res_list$mouseEmbryo_nnSVG$gene_name)
 
 spe_out <- list()
 
@@ -52,10 +52,10 @@ spe_out <- list()
 # calculate downstream clustering on top 1000 SVGs or HVGs
 
 # top 1000 HVGs
-ix <- which(res_list$humanDLPFC_HVGs$rank_HVGs <= 1000)
-top <- res_list$humanDLPFC_HVGs$gene_id[ix]
+ix <- which(res_list$mouseEmbryo_HVGs$rank_HVGs <= 1000)
+top <- res_list$mouseEmbryo_HVGs$gene_name[ix]
 
-spe <- spe_list$humanDLPFC_HVGs
+spe <- spe_list$mouseEmbryo_HVGs
 
 # dimensionality reduction
 
@@ -74,7 +74,7 @@ colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
 
 # graph-based clustering
 set.seed(123)
-g <- buildSNNGraph(spe, k = 25, use.dimred = "PCA")
+g <- buildSNNGraph(spe, k = 50, use.dimred = "PCA")
 g_walk <- igraph::cluster_walktrap(g)
 clus <- g_walk$membership
 colLabels(spe) <- factor(clus)
@@ -94,10 +94,10 @@ spe_out$spe_HVGs <- spe
 # calculate downstream clustering on top 1000 SVGs or HVGs
 
 # nnSVG: top 1000 SVGs
-ix <- which(res_list$humanDLPFC_nnSVG$rank_nnSVG <= 1000)
-top <- res_list$humanDLPFC_nnSVG$gene_id[ix]
+ix <- which(res_list$mouseEmbryo_nnSVG$rank_nnSVG <= 1000)
+top <- res_list$mouseEmbryo_nnSVG$gene_id[ix]
 
-spe <- spe_list$humanDLPFC_nnSVG
+spe <- spe_list$mouseEmbryo_nnSVG
 
 # dimensionality reduction
 
@@ -116,7 +116,7 @@ colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
 
 # graph-based clustering
 set.seed(123)
-g <- buildSNNGraph(spe, k = 10, use.dimred = "PCA")
+g <- buildSNNGraph(spe, k = 40, use.dimred = "PCA")
 g_walk <- igraph::cluster_walktrap(g)
 clus <- g_walk$membership
 colLabels(spe) <- factor(clus)
@@ -147,7 +147,7 @@ res_out <- list(
 )
 
 
-fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/res_downstream_clustering.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/mouseEmbryo/outputs/res_downstream_clustering.rds")
 saveRDS(res_out, file = fn)
 
 
