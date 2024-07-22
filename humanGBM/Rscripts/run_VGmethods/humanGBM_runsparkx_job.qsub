@@ -1,0 +1,16 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job name
+#$ -N humGBM_runsparkx
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+module load R/4.4.0
+Rscript humanGBM_runSPARKX.R

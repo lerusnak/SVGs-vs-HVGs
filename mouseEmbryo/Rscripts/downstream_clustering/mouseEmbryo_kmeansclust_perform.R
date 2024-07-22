@@ -42,22 +42,21 @@ names(spatialcoords_out)
 
 # match clusters to ground truth layers for each method
 
-#match_HVGs <- c(2, 4, 6, 3, 8, 7, 1, 5)
-#coldata_out$HVGs$label <- factor(
-#  coldata_out$HVGs$label, levels = match_HVGs)
+match_HVGs <- c(8, 1, 3, 4, 5, 6, 7, 2, 9, 10, 11)
+coldata_out$HVGs$label <- factor(
+  coldata_out$HVGs$label, levels = match_HVGs)
 
-#match_nnSVG <- c(6, 7, 5, 8, 2, 4, 3, 1)
-#coldata_out$nnSVG$label <- factor(
-#  coldata_out$nnSVG$label, levels = match_nnSVG)
+match_nnSVG <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+coldata_out$nnSVG$label <- factor(
+  coldata_out$nnSVG$label, levels = match_nnSVG)
 
+match_SPARKX <- c(1, 2, 10, 4, 5, 6, 7, 8, 9, 3, 11)
+coldata_out$SPARKX$label <- factor(
+  coldata_out$SPARKX$label, levels = match_SPARKX)
 
 ###################
 #  spatial plots  #
 ###################
-
-# color palette
-pal <- c("#F0027F", "#377EB8", "#4DAF4A", "#984EA3", "#FFD700", "#FF7F00", "#1A1A1A", "#666666")
-
 
 for (i in seq_along(coldata_out)) {
   
@@ -65,7 +64,7 @@ for (i in seq_along(coldata_out)) {
   
   ggplot(df, aes(x = X2, y = X3, 
                  color = label)) + 
-    geom_point(size = 0.1, alpha = 0.4) + 
+    geom_point(size = 0.1, alpha = 0.3) + 
     coord_fixed() + 
     scale_y_reverse() + 
     #scale_color_manual(values = pal, name = "label") + 
@@ -80,7 +79,143 @@ for (i in seq_along(coldata_out)) {
   
   fn <- file.path(plots_dir, 
                   paste0("kmeansclust_mouseEmbryo_", names(coldata_out[i])))
-  ggsave(paste0(fn, ".pdf"), width = 4, height = 4.25)
   ggsave(paste0(fn, ".png"), width = 4, height = 4.25)
 }
 
+
+
+################################################
+
+## Proportions of beads assigned to each cluster comapering VG methods
+
+# HVG Proportions
+hvg_props <- as.data.frame(table(coldata_out[["HVGs"]]$label)/length(coldata_out[["HVGs"]]$label))
+colnames(hvg_props) <- c("cluster", "proportion")
+hvg_props$proportion <- round(hvg_props$proportion, 4)
+hvg_props
+
+method <- rep("HVGs", 11)
+
+hvg_props <- cbind(hvg_props, method)
+hvg_props
+
+# SVG Proportions
+# nnSVG
+nnsvg_props <- as.data.frame(table(coldata_out[["nnSVG"]]$label)/length(coldata_out[["nnSVG"]]$label))
+colnames(nnsvg_props) <- c("cluster", "proportion")
+nnsvg_props$proportion <- round(nnsvg_props$proportion, 4)
+nnsvg_props
+
+method <- rep("nnSVG", 11)
+
+nnsvg_props <- cbind(nnsvg_props, method)
+nnsvg_props
+
+# SparkX
+sparkx_props <- as.data.frame(table(coldata_out[["SPARKX"]]$label)/length(coldata_out[["SPARKX"]]$label))
+colnames(sparkx_props) <- c("cluster", "proportion")
+sparkx_props$proportion <- round(sparkx_props$proportion, 4)
+sparkx_props
+
+method <- rep("SPARKX", 11)
+
+sparkx_props <- cbind(sparkx_props, method)
+sparkx_props
+
+# Moran's I
+mori_props <- as.data.frame(table(coldata_out[["MorI"]]$label)/length(coldata_out[["MorI"]]$label))
+colnames(mori_props) <- c("cluster", "proportion")
+mori_props$proportion <- round(mori_props$proportion, 4)
+mori_props
+
+method <- rep("MoransI", 11)
+
+mori_props <- cbind(mori_props, method)
+mori_props
+
+
+# Combined VG proportions data frame
+vg_props <- rbind(hvg_props, nnsvg_props, sparkx_props, mori_props)
+vg_props
+
+vg_props_wide <- vg_props %>% pivot_wider(names_from = cluster, values_from = proportion) %>% 
+  select(method, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`)
+vg_props_wide
+
+write_tsv(vg_props_wide, file = here(plots_dir, 'prop_spots_percluster.tsv'))
+
+ggplot(data = vg_props, aes(x = method, y = proportion, fill = cluster)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  labs(title = "Proporiton of beads belonging to ")
+ggsave(filename = here(plots_dir, 'beadsprop_percluster_plot.png'))
+
+
+
+## Frequencies
+
+# HVG Frequencies
+hvg_freqs <- as.data.frame(table(coldata_out[["HVGs"]]$label))
+colnames(hvg_freqs) <- c("cluster", "frequency")
+hvg_freqs
+
+method <- rep("HVGs", 11)
+
+hvg_freqs <- cbind(hvg_freqs, method)
+hvg_freqs
+
+# SVG Frequencies
+nnsvg_freqs <- as.data.frame(table(coldata_out[["nnSVG"]]$label))
+colnames(nnsvg_freqs) <- c("cluster", "frequency")
+nnsvg_freqs
+
+method <- rep("nnSVG", 11)
+
+nnsvg_freqs <- cbind(nnsvg_freqs, method)
+nnsvg_freqs
+
+# Spark-X
+sparkx_freqs <- as.data.frame(table(coldata_out[["SPARKX"]]$label))
+colnames(sparkx_freqs) <- c("cluster", "frequency")
+sparkx_freqs
+
+method <- rep("SPARKX", 11)
+
+sparkx_freqs <- cbind(sparkx_freqs, method)
+sparkx_freqs
+
+# Moran's I
+mori_freqs <- as.data.frame(table(coldata_out[["MorI"]]$label))
+colnames(mori_freqs) <- c("cluster", "frequency")
+mori_freqs
+
+method <- rep("MorI", 11)
+
+mori_freqs <- cbind(mori_freqs, method)
+mori_freqs
+
+
+# Combined VG frequencies data frame
+vg_freqs <- rbind(hvg_freqs, nnsvg_freqs, sparkx_freqs, mori_freqs)
+vg_freqs
+
+vg_freqs_wide <- vg_freqs %>% pivot_wider(names_from = cluster, values_from = frequency) %>% 
+  select(method, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`)
+vg_freqs_wide
+
+write_tsv(vg_freqs_wide, file = here(plots_dir, 'beadsfreq_percluster.tsv'))
+
+# Stacked Barplot
+ggplot(data = vg_freqs, aes(x = method, y = frequency, fill = cluster)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  labs(title = "frequency of beads belonging to ")
+ggsave(filename = here(plots_dir, 'beadsfreq_percluster_plot.png'))
+
+
+##############################################################
+
+# Comparing HVG cluster labels to nnSVG cluster labels
+
+nnsvg_vs_hvg_ari <- adjustedRandIndex(coldata_out[["nnSVG"]]$label,coldata_out[["HVGs"]]$label)
+nnsvg_vs_hvg_ari # 0.558479

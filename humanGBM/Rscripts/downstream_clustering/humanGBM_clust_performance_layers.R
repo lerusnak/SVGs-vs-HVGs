@@ -57,11 +57,19 @@ HVGs_df <- as.data.frame(cbind(coldata_out$HVGs, spatialcoords_out$HVGs)) %>%
   rownames_to_column(var = "spot_id") %>% arrange(spot_id)
 HVGs_df <- full_join(HVGs_df, spot_labels, by = "spot_id")
 
-SVGs_df <- as.data.frame(cbind(coldata_out$nnSVG, spatialcoords_out$nnSVG)) %>% 
+nnSVG_df <- as.data.frame(cbind(coldata_out$nnSVG, spatialcoords_out$nnSVG)) %>% 
   rownames_to_column(var = "spot_id") %>% arrange(spot_id)
-SVGs_df <- full_join(HVGs_df, spot_labels, by = "spot_id")
+nnSVG_df <- full_join(nnSVG_df, spot_labels, by = "spot_id")
 
-VGdf_list <- list(HVGs_df, SVGs_df)
+SPARKX_df <- as.data.frame(cbind(coldata_out$SPARKX, spatialcoords_out$SPARKX)) %>% 
+  rownames_to_column(var = "spot_id") %>% arrange(spot_id)
+SPARKX_df <- full_join(SPARKX_df, spot_labels, by = "spot_id")
+
+MorI_df <- as.data.frame(cbind(coldata_out$MorI, spatialcoords_out$MorI)) %>% 
+  rownames_to_column(var = "spot_id") %>% arrange(spot_id)
+MorI_df <- full_join(MorI_df, spot_labels, by = "spot_id")
+
+VGdf_list <- list(HVGs_df, nnSVG_df, SPARKX_df, MorI_df)
 
 
 
@@ -78,6 +86,14 @@ coldata_out$HVGs$label <- factor(
 match_nnSVG <- c(5, 1, 2, 3, 4)
 coldata_out$nnSVG$label <- factor(
   coldata_out$nnSVG$label, levels = match_nnSVG)
+
+match_SPARKX <- c(5, 1, 4, 3, 2)
+coldata_out$SPARKX$label <- factor(
+  coldata_out$SPARKX$label, levels = match_SPARKX)
+
+match_MorI <- c(4, 2, 5, 1, 3)
+coldata_out$MorI$label <- factor(
+  coldata_out$MorI$label, levels = match_MorI)
 
 
 ###################
@@ -115,7 +131,6 @@ for (i in seq_along(coldata_out)) {
   
   # Saving plots
   fn <- file.path(plots_dir, paste0("clustering_humanGBM_layers_", names(coldata_out)[i]))
-  ggsave(paste0(fn, ".pdf"), plot = p, width = 4, height = 4.25)
   ggsave(paste0(fn, ".png"), plot = p, width = 4, height = 4.25)
 }
 
@@ -144,19 +159,6 @@ ggsave("xyplot_truelayers.png", path = "/projectnb/weber-lr/SVGs-vs-HVGs/humanGB
 #   ARI   #
 ###########
 
-
-## LAYERS ##
-
-# re-label factor levels combine clusters 7 and 8 into a single cluster
-# representing white matter
-
-#coldata_out$HVGs$label <- factor(
-#  coldata_out$HVGs$label, labels = c("WM", "Layer6", "Layer2", "Layer5", "WM", "Layer4", "Layer1", "Layer3"))
-
-#coldata_out$nnSVG$label <- factor(
-#  coldata_out$nnSVG$label, labels = c("WM", "Layer3", "WM", "Layer1", "Layer4", "Layer6", "Layer5", "Layer2"))
-
-
 # calculate adjusted rand index
 
 ari_HVGs_layers <- round(adjustedRandIndex(VGs_df[[1]]$label, 
@@ -165,12 +167,18 @@ ari_HVGs_layers <- round(adjustedRandIndex(VGs_df[[1]]$label,
 ari_nnSVG_layers <-round(adjustedRandIndex(VGs_df[[2]]$label, 
                                       VGs_df[[2]]$layer), 4)
 
+ari_SPARKX_layers <-round(adjustedRandIndex(VGs_df[[3]]$label, 
+                                           VGs_df[[3]]$layer), 4)
+
+ari_MorI_layers <-round(adjustedRandIndex(VGs_df[[4]]$label, 
+                                           VGs_df[[4]]$layer), 4)
+
 
 # plot adjusted Rand index
 
 df_layers <- data.frame(
-  method = c("HVGs", "nnSVG"), 
-  ARI = c(ari_HVGs_layers, ari_nnSVG_layers)
+  method = c("HVGs", "nnSVG", "SPARKX", "MoransI"), 
+  ARI = c(ari_HVGs_layers, ari_nnSVG_layers, ari_SPARKX_layers, ari_MorI_layers)
 )
 
 df_layers
@@ -178,5 +186,20 @@ df_layers
 
 write_tsv(df_layers, file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/plots/clustering/ari_layers.tsv")
 
+
+pal_methods <- c("#D1A546", "#C459A1", "#1570AD", "#50AD95")
+
+ggplot(df_layers, aes(x = method, y = ARI, shape = method, color = method)) + 
+  geom_point(stroke = 1.5, size = 2) + 
+  scale_shape_manual(values = c(4, 3, 5, 6)) + 
+  scale_color_manual(values = pal_methods) + 
+  ylim(c(0, 1)) + 
+  ggtitle("Downstream clustering performance") + 
+  labs(y = "Adjusted Rand Index") + 
+  theme_bw() + 
+  theme(axis.title.x = element_blank())
+
+fn <- file.path(plots_dir, "summary_clustering_performance_ARI")
+ggsave(paste0(fn, ".png"), width = 4.75, height = 3.1)
 
 

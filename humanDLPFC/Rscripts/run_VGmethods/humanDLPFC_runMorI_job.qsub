@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# name
+#$ -N humanDLPFC_runMorI
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# number of cores
+#$ -pe omp 10
+
+# memory per core
+#$ -l mem_per_core=6G
+
+module load R/4.4.0
+Rscript humanDLPFC_runMoransI_lowFilt.R

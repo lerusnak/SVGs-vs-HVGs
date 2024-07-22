@@ -74,7 +74,7 @@ colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
 
 # graph-based clustering
 set.seed(123)
-g <- buildSNNGraph(spe, k = 50, use.dimred = "PCA")
+g <- buildSNNGraph(spe, k = 22, use.dimred = "PCA")
 g_walk <- igraph::cluster_walktrap(g)
 clus <- g_walk$membership
 colLabels(spe) <- factor(clus)
@@ -116,7 +116,7 @@ colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
 
 # graph-based clustering
 set.seed(123)
-g <- buildSNNGraph(spe, k = 40, use.dimred = "PCA")
+g <- buildSNNGraph(spe, k = 30, use.dimred = "PCA")
 g_walk <- igraph::cluster_walktrap(g)
 clus <- g_walk$membership
 colLabels(spe) <- factor(clus)

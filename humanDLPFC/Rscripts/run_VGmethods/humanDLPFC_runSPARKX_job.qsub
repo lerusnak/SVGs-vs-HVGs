@@ -1,0 +1,16 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job name
+#$ -N humanDLPFC_runSPARKX
+
+# combine error and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+module load R/4.4.0
+Rscript humanDLPFC_runSPARKX_lowFilt.R

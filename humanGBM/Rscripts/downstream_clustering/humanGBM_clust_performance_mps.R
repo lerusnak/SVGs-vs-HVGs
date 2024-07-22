@@ -57,11 +57,19 @@ HVGs_df <- as.data.frame(cbind(coldata_out$HVGs, spatialcoords_out$HVGs)) %>%
   rownames_to_column(var = "spot_id") %>% arrange(spot_id)
 HVGs_df <- full_join(HVGs_df, spot_labels, by = "spot_id")
 
-SVGs_df <- as.data.frame(cbind(coldata_out$nnSVG, spatialcoords_out$nnSVG)) %>% 
+nnSVG_df <- as.data.frame(cbind(coldata_out$nnSVG, spatialcoords_out$nnSVG)) %>% 
   rownames_to_column(var = "spot_id") %>% arrange(spot_id)
-SVGs_df <- full_join(HVGs_df, spot_labels, by = "spot_id")
+nnSVG_df <- full_join(nnSVG_df, spot_labels, by = "spot_id")
 
-VGdf_list <- list(HVGs_df, SVGs_df)
+SPARKX_df <- as.data.frame(cbind(coldata_out$SPARKX, spatialcoords_out$SPARKX)) %>% 
+  rownames_to_column(var = "spot_id") %>% arrange(spot_id)
+SPARKX_df <- full_join(SPARKX_df, spot_labels, by = "spot_id")
+
+MorI_df <- as.data.frame(cbind(coldata_out$MorI, spatialcoords_out$MorI)) %>% 
+  rownames_to_column(var = "spot_id") %>% arrange(spot_id)
+MorI_df <- full_join(MorI_df, spot_labels, by = "spot_id")
+
+VGdf_list <- list(HVGs_df, nnSVG_df, SPARKX_df, MorI_df)
 
 
 
@@ -71,21 +79,23 @@ VGdf_list <- list(HVGs_df, SVGs_df)
 
 # match clusters to ground truth layers for each method
 
-#match_HVGs <- c(1, 5, 4, 6, 8, 2, 3, 7)
-#coldata_out$HVGs$label <- factor(
-#  coldata_out$HVGs$label, levels = match_HVGs)
+match_HVGs <- c(1, 2, 3, 6, 5, 4)
+coldata_out$HVGs$label <- factor(
+  coldata_out$HVGs$label, levels = match_HVGs)
 
-#match_nnSVG <- c(4, 1, 2, 3, 5)
-#coldata_out$nnSVG$label <- factor(
-#  coldata_out$nnSVG$label, levels = match_nnSVG)
+match_SPARKX <- c(1, 5, 3, 2, 4)
+coldata_out$SPARKX$label <- factor(
+  coldata_out$SPARKX$label, levels = match_SPARKX)
+
+match_MorI <- c(3, 1, 2, 4, 5)
+coldata_out$MorI$label <- factor(
+  coldata_out$MorI$label, levels = match_MorI)
 
 
 ###################
 #  spatial plots  #
 ###################
 
-# color palette
-# pal <- c("#F0027F", "#377EB8", "#4DAF4A", "#984EA3", "#FFD700", "#FF7F00", "#1A1A1A", "#666666")
 VGs_df <- list()
 
 for (i in seq_along(coldata_out)) {
@@ -115,7 +125,6 @@ for (i in seq_along(coldata_out)) {
   
   # Saving plots
   fn <- file.path(plots_dir, paste0("clustering_humanGBM_mps_", names(coldata_out)[i]))
-  ggsave(paste0(fn, ".pdf"), plot = p, width = 4, height = 4.25)
   ggsave(paste0(fn, ".png"), plot = p, width = 4, height = 4.25)
 }
 
@@ -147,30 +156,26 @@ ggsave("xyplot_trueMPs.png", path = "/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/p
 
 ## MPs ##
 
-# re-label factor levels combine clusters 7 and 8 into a single cluster
-# representing white matter
-
-#coldata_out$HVGs$label <- factor(
-#  coldata_out$HVGs$label, labels = c("WM", "Layer6", "Layer2", "Layer5", "WM", "Layer4", "Layer1", "Layer3"))
-
-#coldata_out$nnSVG$label <- factor(
-#  coldata_out$nnSVG$label, labels = c("WM", "Layer3", "WM", "Layer1", "Layer4", "Layer6", "Layer5", "Layer2"))
-
-
 # calculate adjusted rand index
 
 ari_HVGs_mps <- round(adjustedRandIndex(VGs_df[[1]]$label, 
-                                  VGs_df[[1]]$mp))
+                                  VGs_df[[1]]$mp), 4)
 
 ari_nnSVG_mps <- round(adjustedRandIndex(VGs_df[[2]]$label, 
-                                   VGs_df[[2]]$mp))
+                                   VGs_df[[2]]$mp), 4)
+
+ari_SPARKX_mps <-round(adjustedRandIndex(VGs_df[[3]]$label, 
+                                            VGs_df[[3]]$mp), 4)
+
+ari_MorI_mps <-round(adjustedRandIndex(VGs_df[[4]]$label, 
+                                          VGs_df[[4]]$mp), 4)
 
 
 # plot adjusted Rand index
 
 df_mps <- data.frame(
-  method = c("HVGs", "nnSVG"), 
-  ARI = c(ari_HVGs_mps, ari_nnSVG_mps)
+  method = c("HVGs", "nnSVG", "SPARKX", "MoransI"), 
+  ARI = c(ari_HVGs_mps, ari_nnSVG_mps, ari_SPARKX_mps, ari_MorI_mps)
 )
 
 df_mps

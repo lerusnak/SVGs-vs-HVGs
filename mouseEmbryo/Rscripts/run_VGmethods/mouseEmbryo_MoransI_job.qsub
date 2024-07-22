@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job name
+#$ -N mouseEmbryo_MorI
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# number of cores
+#$ -pe omp 10
+
+# memory per core
+#$ -l mem_per_core=6G
+
+module load R/4.4.0
+Rscript mouseEmbryo_runMoransI.R
