@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job name
+#$ -N humanDLPFC_runSpaDE2
+
+# combine errors and outs
+#$ -j y
+
+# eamil
+#$ -m ea
+
+# number of cores
+#$ -pe omp 10
+
+# memory per core
+#$ -l mempercore=6G
+
+module load python3/3.10.12
+python humanDLPFC_runSpaDE2.py

@@ -10,8 +10,6 @@ import pandas as pd
 import numpy as np
 import argparse
 import scanpy as sc
-import pandas as pd
-import numpy as np
 import tracemalloc
 import SpatialDE as sd
 from tqdm import tqdm

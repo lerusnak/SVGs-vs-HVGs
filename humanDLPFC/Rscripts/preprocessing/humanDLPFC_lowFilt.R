@@ -43,10 +43,6 @@ spe <- spe[!is_mito, ]
 dim(spe)
 
 
-# filter zero-expressed genes
-# is_zero <- rowSums(counts(spe)) == 0
-# spe <- spe[!is_zero, ]
-
 # filter low-expressed genes
 is_low <- rowSums(counts(spe)) <= 20
 table(is_low)
@@ -60,6 +56,14 @@ spe <- computeLibraryFactors(spe)
 spe <- logNormCounts(spe)
 
 assayNames(spe)
+
+
+# Add spatial information into colData(spe)
+
+colData(spe)$spatial0 <- spatialCoords(spe)[,1]
+colData(spe)$spatial1 <- spatialCoords(spe)[,2]
+
+head(colData(spe))
 
 spe
 
