@@ -69,7 +69,11 @@ MorI_df <- as.data.frame(cbind(coldata_out$MorI, spatialcoords_out$MorI)) %>%
   rownames_to_column(var = "spot_id") %>% arrange(spot_id)
 MorI_df <- full_join(MorI_df, spot_labels, by = "spot_id")
 
-VGdf_list <- list(HVGs_df, nnSVG_df, SPARKX_df, MorI_df)
+SpatialDE2_df <- as.data.frame(cbind(coldata_out$SpatialDE2, spatialcoords_out$SpatialDE2)) %>% 
+  rownames_to_column(var = "spot_id") %>% arrange(spot_id)
+SpatialDE2_df <- full_join(SpatialDE2_df, spot_labels, by = "spot_id")
+
+VGdf_list <- list(HVGs_df, nnSVG_df, SPARKX_df, MorI_df, SpatialDE2_df)
 
 
 
@@ -94,6 +98,11 @@ coldata_out$SPARKX$label <- factor(
 match_MorI <- c(4, 2, 5, 1, 3)
 coldata_out$MorI$label <- factor(
   coldata_out$MorI$label, levels = match_MorI)
+
+match_SDE2 <- c(3, 2, 5, 4, 1)
+coldata_out$SpatialDE2$label <- factor(
+  coldata_out$SpatialDE2$label, levels = match_SDE2)
+
 
 
 ###################
@@ -173,12 +182,14 @@ ari_SPARKX_layers <-round(adjustedRandIndex(VGs_df[[3]]$label,
 ari_MorI_layers <-round(adjustedRandIndex(VGs_df[[4]]$label, 
                                            VGs_df[[4]]$layer), 4)
 
+ari_SDE2_layers <-round(adjustedRandIndex(VGs_df[[5]]$label, 
+                                          VGs_df[[5]]$layer), 4)
 
 # plot adjusted Rand index
 
 df_layers <- data.frame(
-  method = c("HVGs", "nnSVG", "SPARKX", "MoransI"), 
-  ARI = c(ari_HVGs_layers, ari_nnSVG_layers, ari_SPARKX_layers, ari_MorI_layers)
+  method = c("HVGs", "nnSVG", "SPARKX", "MoransI", "SpatialDE2"), 
+  ARI = c(ari_HVGs_layers, ari_nnSVG_layers, ari_SPARKX_layers, ari_MorI_layers, ari_SDE2_layers)
 )
 
 df_layers
@@ -187,11 +198,11 @@ df_layers
 write_tsv(df_layers, file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/plots/clustering/ari_layers.tsv")
 
 
-pal_methods <- c("#D1A546", "#C459A1", "#1570AD", "#50AD95")
+pal_methods <- c("#D1A546", "#C459A1", "#1570AD", "#50AD95", "#7D68FA")
 
 ggplot(df_layers, aes(x = method, y = ARI, shape = method, color = method)) + 
   geom_point(stroke = 1.5, size = 2) + 
-  scale_shape_manual(values = c(4, 3, 5, 6)) + 
+  scale_shape_manual(values = c(4, 3, 5, 6, 1)) + 
   scale_color_manual(values = pal_methods) + 
   ylim(c(0, 1)) + 
   ggtitle("Downstream clustering performance") + 

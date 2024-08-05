@@ -43,6 +43,19 @@ humanGBM_HVGs <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs
 humanGBM_nnSVG <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_nnSVG.rds"))
 humanGBM_SPARKX <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_SPARKX.rds"))
 humanGBM_MorI <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_MorI.rds"))
+humanGBM_SpatialDE2 <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_lowFilt.rds"))
+
+# Genes and symbols df 
+genesymbols <- as.data.frame(rowData(humanGBM_HVGs)) %>% select(symbol) %>% rownames_to_column(var = "gene_id")
+
+SpatialDE2.rowdat <- read.csv("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/humanGBM_SpatialDE2.csv")
+
+# Add symbols to SpatialDE2 rowData
+SpatialDE2.rowdat <- merge(SpatialDE2.rowdat, genesymbols, by = "gene_id") %>% column_to_rownames(var  ="X")
+
+# create SpatialDE2 spe with correct rowData
+rowData(humanGBM_SpatialDE2) <- SpatialDE2.rowdat 
+
 
 humanGBM_HVGs <- humanGBM_HVGs[,colnames(humanGBM_HVGs) %in% spots]
 dim(humanGBM_HVGs)
@@ -56,21 +69,27 @@ dim(humanGBM_SPARKX)
 humanGBM_MorI <- humanGBM_MorI[,colnames(humanGBM_MorI) %in% spots]
 dim(humanGBM_MorI)
 
+humanGBM_SpatialDE2 <- humanGBM_SpatialDE2[,colnames(humanGBM_SpatialDE2) %in% spots]
+dim(humanGBM_SpatialDE2)
+
 spe_list <- list(humanGBM_HVGs = humanGBM_HVGs, 
                  humanGBM_nnSVG = humanGBM_nnSVG, 
                  humanGBM_SPARKX = humanGBM_SPARKX, 
-                 humanGBM_MorI = humanGBM_MorI)
+                 humanGBM_MorI = humanGBM_MorI,
+                 humanGBM_SpatialDE2 = humanGBM_SpatialDE2)
 
 res_list <- list(humanGBM_HVGs = rowData(humanGBM_HVGs), 
                  humanGBM_nnSVG = rowData(humanGBM_nnSVG),
                  humanGBM_SPARKX = rowData(humanGBM_SPARKX),
-                 humanGBM_MorI = rowData(humanGBM_MorI))
+                 humanGBM_MorI = rowData(humanGBM_MorI),
+                 humanGBM_SpatialDE2 = SpatialDE2.rowdat)
 
 
 # add method names to all columns except gene IDs and gene names
 colnames(res_list[["humanGBM_nnSVG"]])[-(1:2)] <- paste0(colnames(res_list[["humanGBM_nnSVG"]]), "_nnSVG")[-(1:2)]
 colnames(res_list[["humanGBM_SPARKX"]])[-(1:2)] <- paste0(colnames(res_list[["humanGBM_SPARKX"]]), "_SPARKX")[-(1:2)]
 colnames(res_list[["humanGBM_MorI"]])[-(1:2)] <- paste0(colnames(res_list[["humanGBM_MorI"]]), "_MorI")[-(1:2)]
+colnames(res_list[["humanGBM_SpatialDE2"]])[-(1:2)] <- paste0(colnames(res_list[["humanGBM_SpatialDE2"]]), "_SpatialDE2")[-(1:2)]
 colnames(res_list[["humanGBM_HVGs"]])[-(1:2)] <- paste0(colnames(res_list[["humanGBM_HVGs"]]), "_HVGs")[-(1:2)]
 
 
@@ -79,6 +98,7 @@ colnames(res_list[["humanGBM_HVGs"]])[-(1:2)] <- paste0(colnames(res_list[["huma
 table(res_list$humanGBM_HVGs$gene_id %in% res_list$humanGBM_nnSVG$gene_id)
 table(res_list$humanGBM_HVGs$symbol %in% res_list$humanGBM_SPARKX$symbol)
 table(res_list$humanGBM_HVGs$symbol %in% res_list$humanGBM_MorI$symbol)
+table(res_list$humanGBM_HVGs$symbol %in% res_list$humanGBM_SpatialDE2$symbol)
 
 spe_out <- list()
 
@@ -245,6 +265,46 @@ colLabels(spe) <- factor(clus)
 spe_out$spe_MorI <- spe
 
 
+# ---------------------------------
+# downstream clustering: SpatialDE2
+# ---------------------------------
+
+# calculate downstream clustering on top 1000 SVGs or HVGs
+
+# top 1000 HVGs
+ix <- which(res_list$humanGBM_SpatialDE2$rank_SpatialDE2 <= 1000)
+genes_subset <- res_list$humanGBM_SpatialDE2[ix,]
+top <- rownames(genes_subset)
+
+spe <- spe_list$humanGBM_SpatialDE2
+
+# dimensionality reduction
+
+# note: selected random seeds to get equal number of clusters per method
+
+# compute PCA
+set.seed(2)
+spe <- runPCA(spe, subset_row = top)
+# compute UMAP on top 50 PCs
+set.seed(1234)
+spe <- runUMAP(spe, dimred = "PCA")
+# update column names
+colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
+
+# clustering
+
+# graph-based clustering
+set.seed(1234)
+g <- buildSNNGraph(spe, k = 6, use.dimred = "PCA")
+g_walk <- igraph::cluster_walktrap(g)
+clus <- g_walk$membership
+colLabels(spe) <- factor(clus)
+
+
+# store object
+spe_out$spe_SpatialDE2 <- spe
+
+
 
 # ------------
 # save results
@@ -257,11 +317,13 @@ coldata_out <- spatialcoords_out <- list()
 coldata_out$nnSVG <- colData(spe_out$spe_nnSVG)
 coldata_out$SPARKX <- colData(spe_out$spe_SPARKX)
 coldata_out$MorI <- colData(spe_out$spe_MorI)
+coldata_out$SpatialDE2 <- colData(spe_out$spe_SpatialDE2)
 coldata_out$HVGs <- colData(spe_out$spe_HVGs)
 
 spatialcoords_out$nnSVG <- spatialCoords(spe_out$spe_nnSVG)
 spatialcoords_out$SPARKX <- spatialCoords(spe_out$spe_SPARKX)
 spatialcoords_out$MorI <- spatialCoords(spe_out$spe_MorI)
+spatialcoords_out$SpatialDE2 <- spatialCoords(spe_out$spe_SpatialDE2)
 spatialcoords_out$HVGs <- spatialCoords(spe_out$spe_HVGs)
 
 res_out <- list(

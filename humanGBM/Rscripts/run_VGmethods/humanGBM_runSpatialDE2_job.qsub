@@ -1,0 +1,16 @@
+#!/bin/bash -l
+
+# project 
+#$ -P weber-lr
+
+# job name
+#$ -N humanGBM_SpatialDE2
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+module load python3/3.10.12
+python humanGBM_runSpatialDE2.py

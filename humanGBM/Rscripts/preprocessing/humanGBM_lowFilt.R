@@ -43,10 +43,6 @@ spe <- spe[!is_mito, ]
 dim(spe)
 
 
-# filter zero-expressed genes
-# is_zero <- rowSums(counts(spe)) == 0
-# spe <- spe[!is_zero, ]
-
 # filter low-expressed genes
 is_low <- rowSums(counts(spe)) <= 20
 table(is_low)

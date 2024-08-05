@@ -4,19 +4,19 @@
 #$ -P weber-lr
 
 # job name
-#$ -N humanDLPFC_runSpaDE2
+#$ -N mouseEmbryo_runSpatialDE2
 
 # combine errors and outs
 #$ -j y
 
-# eamil
+# email
 #$ -m ea
 
 # number of cores
 #$ -pe omp 10
 
 # memory per core
-#$ -l mempercore=6G
+#$ -l mem_per_core=6G
 
 module load python3/3.10.12
-python humanDLPFC_runSpaDE2.py
+python mouseEmbryo_runSpatialDE2.py

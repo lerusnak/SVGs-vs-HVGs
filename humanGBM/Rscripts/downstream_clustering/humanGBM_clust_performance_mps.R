@@ -91,6 +91,10 @@ match_MorI <- c(3, 1, 2, 4, 5)
 coldata_out$MorI$label <- factor(
   coldata_out$MorI$label, levels = match_MorI)
 
+match_SDE2 <- c(1, 4, 2, 3, 5)
+coldata_out$SpatialDE2$label <- factor(
+  coldata_out$SpatialDE2$label, levels = match_SDE2)
+
 
 ###################
 #  spatial plots  #
@@ -170,17 +174,35 @@ ari_SPARKX_mps <-round(adjustedRandIndex(VGs_df[[3]]$label,
 ari_MorI_mps <-round(adjustedRandIndex(VGs_df[[4]]$label, 
                                           VGs_df[[4]]$mp), 4)
 
+ari_SDE2_mps <-round(adjustedRandIndex(VGs_df[[5]]$label, 
+                                         VGs_df[[5]]$mp), 4)
+
 
 # plot adjusted Rand index
 
 df_mps <- data.frame(
-  method = c("HVGs", "nnSVG", "SPARKX", "MoransI"), 
-  ARI = c(ari_HVGs_mps, ari_nnSVG_mps, ari_SPARKX_mps, ari_MorI_mps)
+  method = c("HVGs", "nnSVG", "SPARKX", "MoransI", "SpatialDE2"), 
+  ARI = c(ari_HVGs_mps, ari_nnSVG_mps, ari_SPARKX_mps, ari_MorI_mps, ari_SDE2_mps)
 )
 
 df_mps
 
 
 write_tsv(df_mps, file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/plots/clustering/ari_mps.tsv")
+
+pal_methods <- c("#D1A546", "#C459A1", "#1570AD", "#50AD95", "#7D68FA")
+
+ggplot(df_mps, aes(x = method, y = ARI, shape = method, color = method)) + 
+  geom_point(stroke = 1.5, size = 2) + 
+  scale_shape_manual(values = c(4, 3, 5, 6, 1)) + 
+  scale_color_manual(values = pal_methods) + 
+  ylim(c(0, 1)) + 
+  ggtitle("Downstream clustering performance") + 
+  labs(y = "Adjusted Rand Index") + 
+  theme_bw() + 
+  theme(axis.title.x = element_blank())
+
+fn <- file.path(plots_dir, "summary_clustering_performance_ARI")
+ggsave(paste0(fn, ".png"), width = 4.75, height = 3.1)
 
 
