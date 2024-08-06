@@ -35,23 +35,42 @@ spots <- spot_labels$spot_id
 length(spots)
 
 
-# scalable methods: nnSVG, SPARK-X, Moran's I, SpatialDE2, HVGs
+# scalable methods: nnSVG, SPARK-X, SpatialDE2, Moran's I, HVGs
 
-# note choice of filtering per method
+### Load spatial experiment objects for all VG methods ###
 
 humanGBM_HVGs <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_HVGs.rds"))
 humanGBM_nnSVG <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_nnSVG.rds"))
 humanGBM_SPARKX <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_SPARKX.rds"))
 humanGBM_MorI <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_MorI.rds"))
+
+### Create spe for SpatialDE2 data ###
+
+# Spatial experiment object to use for SpatialDE2 output
 humanGBM_SpatialDE2 <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_lowFilt.rds"))
+
+# Load run SpatialDE2 python output
+sde2.py.out <- read.csv(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/humanGBM_SpatialDE2.csv"))
 
 # Genes and symbols df 
 genesymbols <- as.data.frame(rowData(humanGBM_HVGs)) %>% select(symbol) %>% rownames_to_column(var = "gene_id")
 
-SpatialDE2.rowdat <- read.csv("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/humanGBM_SpatialDE2.csv")
-SpatialDE2.rowdat <- merge(SpatialDE2.rowdat, genesymbols, by = "gene_id") %>% column_to_rownames(var  ="X")
-rowData(humanGBM_SpatialDE2) <- SpatialDE2.rowdat 
+# Add symbols to SpatialDE2 rowData and coerce gene_id to rownames in SpatialDE2 python output (rowData)
+sde2.rowdat <- merge(sde2.py.out, genesymbols, by = "gene_id") %>% column_to_rownames(var  ="X")
 
+# Sort SDE2 rowdata to match spe 
+sde2.rowdat.sorted <- sde2.rowdat[rownames(humanGBM_SpatialDE2), ]
+
+# check that spe and SDE2.rowdat.sorted have same number of features,
+# and all rownames of features match
+dim(sde2.rowdat.sorted)
+dim(rowData(humanGBM_SpatialDE2))
+all(rownames(rowData(humanGBM_SpatialDE2)) == sde2.rowdat.sorted$gene_id)
+
+# Overwrite spe rowdata with sorted SpatialDE2 python output
+rowData(humanGBM_SpatialDE2) <- sde2.rowdat.sorted
+
+# Filter out NA spots
 humanGBM_HVGs <- humanGBM_HVGs[,colnames(humanGBM_HVGs) %in% spots]
 dim(humanGBM_HVGs)
 
@@ -77,7 +96,7 @@ res_list <- list(humanGBM_HVGs = rowData(humanGBM_HVGs),
                  humanGBM_nnSVG = rowData(humanGBM_nnSVG),
                  humanGBM_SPARKX = rowData(humanGBM_SPARKX),
                  humanGBM_MorI = rowData(humanGBM_MorI),
-                 humanGBM_SpatialDE2 = SpatialDE2.rowdat)
+                 humanGBM_SpatialDE2 = rowData(humanGBM_SpatialDE2))
 
 
 # add method names to all columns except gene IDs and gene names
@@ -87,13 +106,15 @@ colnames(res_list[["humanGBM_MorI"]])[-(1:2)] <- paste0(colnames(res_list[["huma
 colnames(res_list[["humanGBM_SpatialDE2"]])[-(1:2)] <- paste0(colnames(res_list[["humanGBM_SpatialDE2"]]), "_SpatialDE2")[-(1:2)]
 colnames(res_list[["humanGBM_HVGs"]])[-(1:2)] <- paste0(colnames(res_list[["humanGBM_HVGs"]]), "_HVGs")[-(1:2)]
 
-table(res_list$humanGBM_HVGs$symbol %in% res_list$humanGBM_nnSVG$symbol)
+
+# note filtering per method
+
+table(res_list$humanGBM_HVGs$gene_id %in% res_list$humanGBM_nnSVG$gene_id)
 table(res_list$humanGBM_HVGs$symbol %in% res_list$humanGBM_SPARKX$symbol)
 table(res_list$humanGBM_HVGs$symbol %in% res_list$humanGBM_MorI$symbol)
 table(res_list$humanGBM_HVGs$symbol %in% res_list$humanGBM_SpatialDE2$symbol)
 
 spe_out <- list()
-
 
 
 # ---------------------------
@@ -265,7 +286,7 @@ spe_out$spe_MorI <- spe
 
 # calculate downstream clustering on top 1000 SVGs or HVGs
 
-# top 1000 HVGs
+# top 1000 SVGs
 ix <- which(res_list$humanGBM_SpatialDE2$rank_SpatialDE2 <= 1000)
 genes_subset <- res_list$humanGBM_SpatialDE2[ix,]
 top <- rownames(genes_subset)
@@ -289,7 +310,7 @@ colnames(reducedDim(spe, "UMAP")) <- paste0("UMAP", 1:2)
 
 # graph-based clustering
 set.seed(1234)
-g <- buildSNNGraph(spe, k = 6, use.dimred = "PCA")
+g <- buildSNNGraph(spe, k = 8, use.dimred = "PCA")
 g_walk <- igraph::cluster_walktrap(g)
 clus <- g_walk$membership
 colLabels(spe) <- factor(clus)
@@ -330,7 +351,4 @@ res_out <- list(
 
 fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/res_downstream_clustering_layers.rds")
 saveRDS(res_out, file = fn)
-
-
-
 

@@ -58,7 +58,7 @@ match_MorI <- c(8, 7, 2, 4, 3, 5, 1, 6)
 coldata_out$MorI$label <- factor(
   coldata_out$MorI$label, levels = match_MorI)
 
-match_sde2 <- c(2, 1, 5, 8, 4, 6, 3, 7)
+match_sde2 <- c(3, 7, 1, 5, 4, 6, 2)
 coldata_out$SpatialDE2$label <- factor(
   coldata_out$SpatialDE2$label, levels = match_sde2)
 

@@ -91,7 +91,7 @@ match_MorI <- c(3, 1, 2, 4, 5)
 coldata_out$MorI$label <- factor(
   coldata_out$MorI$label, levels = match_MorI)
 
-match_SDE2 <- c(1, 4, 2, 3, 5)
+match_SDE2 <- c(2, 1, 3, 4, 5)
 coldata_out$SpatialDE2$label <- factor(
   coldata_out$SpatialDE2$label, levels = match_SDE2)
 
@@ -190,7 +190,7 @@ df_mps
 
 write_tsv(df_mps, file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/plots/clustering/ari_mps.tsv")
 
-pal_methods <- c("#D1A546", "#C459A1", "#1570AD", "#50AD95", "#7D68FA")
+pal_methods <- c("#D1A546", "#C459A1", "#50AD95", "#7D68FA", "#1570AD")
 
 ggplot(df_mps, aes(x = method, y = ARI, shape = method, color = method)) + 
   geom_point(stroke = 1.5, size = 2) + 
@@ -202,7 +202,7 @@ ggplot(df_mps, aes(x = method, y = ARI, shape = method, color = method)) +
   theme_bw() + 
   theme(axis.title.x = element_blank())
 
-fn <- file.path(plots_dir, "summary_clustering_performance_ARI")
+fn <- file.path(plots_dir, "summary_clustering_performance_ARI_mps")
 ggsave(paste0(fn, ".png"), width = 4.75, height = 3.1)
 
 

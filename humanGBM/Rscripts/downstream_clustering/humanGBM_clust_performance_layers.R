@@ -99,7 +99,7 @@ match_MorI <- c(4, 2, 5, 1, 3)
 coldata_out$MorI$label <- factor(
   coldata_out$MorI$label, levels = match_MorI)
 
-match_SDE2 <- c(3, 2, 5, 4, 1)
+match_SDE2 <- c(4, 3, 5, 1, 2)
 coldata_out$SpatialDE2$label <- factor(
   coldata_out$SpatialDE2$label, levels = match_SDE2)
 
@@ -210,7 +210,7 @@ ggplot(df_layers, aes(x = method, y = ARI, shape = method, color = method)) +
   theme_bw() + 
   theme(axis.title.x = element_blank())
 
-fn <- file.path(plots_dir, "summary_clustering_performance_ARI")
+fn <- file.path(plots_dir, "summary_clustering_performance_ARI_layers")
 ggsave(paste0(fn, ".png"), width = 4.75, height = 3.1)
 
 

@@ -19,12 +19,31 @@ library(scran)
 #  load data  #
 ###############
 
-# load in spatial experiments from all VG methods
+### Create spe for SpatialDE2 data ###
 
-# creating spe for SpatialDE2 data
+# Spatial experiment object to use for SpatialDE2 output
 sde2_spe <- readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_HVGs_lowFilt.rds"))
-sde2_rowdat <- read.csv(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/humanDLPFC_SpatialDE2.csv"))
-rowData(sde2_spe) <- sde2_rowdat
+
+# Load run SpatialDE2 python output
+sde2.py.out <- read.csv(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/humanDLPFC_SpatialDE2.csv"))
+
+# Coerce gene_id to rownames in SpatialDE2 python output (rowData)
+sde2.rowdat <- sde2.py.out %>% column_to_rownames(var  ="X")
+
+# Sort SDE2 rowdata to match spe 
+sde2.rowdat.sorted <- sde2.rowdat[rownames(sde2_spe), ]
+
+# check that spe and SDE2.rowdat.sorted have same number of features,
+# and all rownames of features match
+dim(sde2.rowdat.sorted)
+dim(rowData(sde2_spe))
+all(rownames(rowData(sde2_spe)) == sde2.rowdat.sorted$gene_id)
+
+# Overwrite spe rowdata with sorted SpatialDE2 python output
+rowData(sde2_spe) <- sde2.rowdat.sorted
+
+
+### load in spatial experiments from all VG methods ###
 
 spe_list <- list(
   humanDLPFC_HVGs = readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_HVGs_lowFilt.rds")),
@@ -40,7 +59,7 @@ res_list <- list(
   humanDLPFC_SPARKX = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_SPARKX_lowFilt.rds"))),
   humanDLPFC_MorI = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_MorI_lowFilt.rds"))),
   humanDLPFC_HVGs = rowData(readRDS(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/spe_humanDLPFC_HVGs_lowFilt.rds"))),
-  humanDLPFC_SpatialDE2 = read.csv(here("/projectnb/weber-lr/SVGs-vs-HVGs/humanDLPFC/outputs/humanDLPFC_SpatialDE2.csv"))
+  humanDLPFC_SpatialDE2 = rowData(sde2_spe)
   )
 
 # add method names to all columns except gene IDs and gene names
