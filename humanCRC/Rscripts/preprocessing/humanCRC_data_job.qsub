@@ -3,14 +3,14 @@
 # project
 #$ -P weber-lr
 
-# job
-#$ -N mouseEmbryo_clust
+# job name
+#$ -N CRC_data
 
 # combine errors and outs
 #$ -j y
 
-# email
+# email 
 #$ -m ea
 
 module load R/4.4.0
-Rscript mouseEmbryo_clustering.R
+Rscript humanCRC_data.R

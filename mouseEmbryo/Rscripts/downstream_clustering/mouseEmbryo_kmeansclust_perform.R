@@ -11,8 +11,8 @@
 
 library(SpatialExperiment)
 library(here)
+library(tidyverse)
 library(mclust)
-library(ggplot2)
 library(ggspavis)
 library(readr)
 
@@ -54,6 +54,10 @@ match_SPARKX <- c(1, 2, 10, 4, 5, 6, 7, 8, 9, 3, 11)
 coldata_out$SPARKX$label <- factor(
   coldata_out$SPARKX$label, levels = match_SPARKX)
 
+match_SDE2 <- c(1, 2, 10, 8, 4, 6, 9, 11, 7, 3, 5)
+coldata_out$SpatialDE2$label <- factor(
+  coldata_out$SpatialDE2$label, levels = match_SDE2)
+
 ###################
 #  spatial plots  #
 ###################
@@ -64,7 +68,7 @@ for (i in seq_along(coldata_out)) {
   
   ggplot(df, aes(x = X2, y = X3, 
                  color = label)) + 
-    geom_point(size = 0.1, alpha = 0.3) + 
+    geom_point(size = 0.1, alpha = 0.2) + 
     coord_fixed() + 
     scale_y_reverse() + 
     #scale_color_manual(values = pal, name = "label") + 
@@ -134,8 +138,20 @@ mori_props <- cbind(mori_props, method)
 mori_props
 
 
+# Moran's I
+sde2_props <- as.data.frame(table(coldata_out[["SpatialDE2"]]$label)/length(coldata_out[["SpatialDE2"]]$label))
+colnames(sde2_props) <- c("cluster", "proportion")
+sde2_props$proportion <- round(sde2_props$proportion, 4)
+sde2_props
+
+method <- rep("SpatialDE2", 11)
+
+sde2_props <- cbind(sde2_props, method)
+sde2_props
+
+
 # Combined VG proportions data frame
-vg_props <- rbind(hvg_props, nnsvg_props, sparkx_props, mori_props)
+vg_props <- rbind(hvg_props, nnsvg_props, sparkx_props, mori_props, sde2_props)
 vg_props
 
 vg_props_wide <- vg_props %>% pivot_wider(names_from = cluster, values_from = proportion) %>% 
@@ -194,9 +210,19 @@ method <- rep("MorI", 11)
 mori_freqs <- cbind(mori_freqs, method)
 mori_freqs
 
+# SpatialDE2
+sde2_freqs <- as.data.frame(table(coldata_out[["SpatialDE2"]]$label))
+colnames(sde2_freqs) <- c("cluster", "frequency")
+sde2_freqs
+
+method <- rep("SpatialDE2", 11)
+
+sde2_freqs <- cbind(sde2_freqs, method)
+sde2_freqs
+
 
 # Combined VG frequencies data frame
-vg_freqs <- rbind(hvg_freqs, nnsvg_freqs, sparkx_freqs, mori_freqs)
+vg_freqs <- rbind(hvg_freqs, nnsvg_freqs, sparkx_freqs, mori_freqs, sde2_freqs)
 vg_freqs
 
 vg_freqs_wide <- vg_freqs %>% pivot_wider(names_from = cluster, values_from = frequency) %>% 

@@ -1,22 +1,22 @@
 ##################
-#    human GBM   #
+#    human CRC   #
 # pre-processing #
 ##################
 
 
 ## Packages
 library(SpatialExperiment)
-library(STexampleData)
 library(scater)
 library(scran)
 library(here)
+library(ggspavis)
 
 
 #############
 # Load Data #
 #############
 
-spe <- readRDS(file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM.rds")
+spe <- readRDS(file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC/outputs/spe_humanCRC.rds")
 dim(spe)
 
 ###############
@@ -44,12 +44,22 @@ dim(spe)
 
 
 # filter low-expressed genes
-is_low <- rowSums(counts(spe)) <= 20
+is_low <- rowSums(counts(spe)) <= 100
 table(is_low)
 
 spe <- spe[!is_low,]
 
 dim(spe)
+
+# removing any sbin
+low_bins <- colSums(counts(spe)) > 10
+table(low_bins)
+
+spe <- spe[, low_bins]
+
+dim(spe)
+
+# Normalization 
 
 # calculate log-transformed normalized counts using scran package
 # using library size normalization
@@ -66,7 +76,7 @@ spe
 # Save as .rds data #
 #####################
 
-fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanGBM/outputs/spe_humanGBM_lowFilt.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC/outputs/spe_humanCRC_lowFilt.rds")
 saveRDS(spe, file = fn)
 
 

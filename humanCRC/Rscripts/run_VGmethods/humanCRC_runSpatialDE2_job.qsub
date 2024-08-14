@@ -1,0 +1,19 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job name
+#$ -N CRC_SpatialDE2
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# memory per core
+#$ -l mem_per_core=100G
+
+module load python3/3.10.12
+python humanCRC_runSpatialDE2.py

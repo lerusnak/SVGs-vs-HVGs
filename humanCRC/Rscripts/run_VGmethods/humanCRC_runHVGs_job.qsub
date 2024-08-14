@@ -3,8 +3,8 @@
 # project
 #$ -P weber-lr
 
-# job
-#$  -N mouseEmb_clust_sub
+# job name
+#$ -N CRC_HVGs
 
 # combine errors and outs
 #$ -j y
@@ -13,4 +13,4 @@
 #$ -m ea
 
 module load R/4.4.0
-Rscript clustering_subset.R
+Rscript humanCRC_runHVGs.R
