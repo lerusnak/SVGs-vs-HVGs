@@ -43,15 +43,19 @@ names(spatialcoords_out)
 
 ## Create Results Dataframe
 
-HVGs_df <- as.data.frame(cbind(coldata_out$HVGs, spatialcoords_out$HVGs)) %>% 
-  rownames_to_column(var = "spot_id") %>% arrange(spot_id)
-head(HVGs_df)
+#HVGs_df <- as.data.frame(cbind(coldata_out$HVGs, spatialcoords_out$HVGs)) %>% 
+#  rownames_to_column(var = "spot_id") %>% arrange(spot_id) %>% filter(label == 1)
+#dim(HVGs_df)
+#HVGs_df <- HVGs_df[sample(1:nrow(HVGs_df), 5000), ]
+#head(HVGs_df)
+#dim(HVGs_df)
 
-SPARKX_df <- as.data.frame(cbind(coldata_out$SPARKX, spatialcoords_out$SPARKX)) %>% 
-  rownames_to_column(var = "spot_id") %>% arrange(spot_id)
-head(SPARKX_df)
+#SPARKX_df <- as.data.frame(cbind(coldata_out$SPARKX, spatialcoords_out$SPARKX)) %>% 
+#  rownames_to_column(var = "spot_id") %>% arrange(spot_id) %>% filter(label == 1)
+#SPARKX_df <- SPARKX_df[sample(1:nrow(SPARKX_df), 5000), ]
+#head(SPARKX_df)
 
-VGdf_list <- list(HVGs_df, SPARKX_df)
+#VGdf_list <- list(HVGs_df, SPARKX_df)
 
 
 
@@ -71,9 +75,26 @@ VGdf_list <- list(HVGs_df, SPARKX_df)
 
 
 
+
+
 ###################
 #  spatial plots  #
 ###################
+
+HVGs_df <- as.data.frame(cbind(coldata_out$HVGs, spatialcoords_out$HVGs)) %>% 
+  rownames_to_column(var = "spot_id") %>% arrange(spot_id)
+dim(HVGs_df)
+head(HVGs_df)
+
+ggplot(HVGs_df, aes(pxl_col_in_fullres, pxl_row_in_fullres, color = label)) +
+  geom_point(shape = ".", alpha = 0.5) + 
+  coord_fixed() + 
+  scale_y_reverse() +
+  theme_bw()
+  
+
+
+#############################
 
 VGs_df <- list()
 

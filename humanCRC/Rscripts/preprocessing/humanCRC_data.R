@@ -7,6 +7,7 @@ library(here)
 library(arrow)
 library(SpatialExperiment)
 library(tibble)
+library(dplyr)
 
 #############################################
 
@@ -21,6 +22,7 @@ write.csv(tissue_positions, file = here(CRC.outs, "spatial", "tissue_positions_l
 # read in counts
 fnm <- file.path(CRC.outs, "filtered_feature_bc_matrix")
 sce <- DropletUtils::read10xCounts(fnm)
+barcodes <- colData(sce)$Barcode
 
 # read in image data
 img <- readImgData(path = file.path(CRC.outs, "spatial"), sample_id="crc")
@@ -47,11 +49,19 @@ rownames(xyz) <- xyz$barcode
 head(xyz)
 tail(xyz)
 
+# reorder xyz rows to match sce col data
+
+xyz.sorted <- xyz[barcodes, ]
+
+# check
+all(rownames(colData(sce)) == rownames(xyz.sorted))
+
+
 # construct 'SpatialExperiment'
 (spe <- SpatialExperiment(
   assays = list(counts = assay(sce)),
   rowData = rd,
-  colData = DataFrame(xyz),
+  colData = DataFrame(xyz.sorted),
   spatialCoordsNames = c("pxl_col_in_fullres", "pxl_row_in_fullres"),
   imgData = img,
   sample_id = "crc"))

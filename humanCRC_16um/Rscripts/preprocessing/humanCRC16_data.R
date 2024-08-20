@@ -1,6 +1,6 @@
-#############################
-#   Human CRC Data - 16um   #
-#############################
+#########################
+# Human CRC Data (16um) #
+#########################
 
 # Packages
 library(here)
@@ -11,11 +11,11 @@ library(tibble)
 #############################################
 
 # data directory
-CRC.outs <- "/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC/data/outs16um"
+CRC.outs <- "/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC_16um/data/outs16um"
 
 # read in .parquet spatial coordinates file and convert to .csv
 tissue_positions <- read_parquet(here(CRC.outs, "spatial", "tissue_positions.parquet"))
-write.csv(tissue_positions, file = here(CRC.outs, "spatial", "tissue_positions_list_16um.csv"))
+write.csv(tissue_positions, file = here(CRC.outs, "spatial", "tissue_positions_list.csv"))
 
 
 # read in counts
@@ -23,10 +23,10 @@ fnm <- file.path(CRC.outs, "filtered_feature_bc_matrix")
 sce <- DropletUtils::read10xCounts(fnm)
 
 # read in image data
-img <- readImgData(path = file.path(CRC.outs, "spatial"), sample_id="crc")
+img <- readImgData(path = file.path(CRC.outs, "spatial"), sample_id="crc16um")
 
 # read in spatial coordinates
-fnm <- file.path(CRC.outs, "spatial", "tissue_positions_list_16um.csv")
+fnm <- file.path(CRC.outs, "spatial", "tissue_positions_list.csv")
 xyz <- read.csv(fnm)
 
 # construct observation & feature metadata
@@ -42,6 +42,11 @@ dim(xyz)
 xyz <- xyz[xyz$barcode %in% colData(sce)$Barcode,]
 dim(xyz)
 
+# add rownames to xyz
+rownames(xyz) <- xyz$barcode
+head(xyz)
+tail(xyz)
+
 # construct 'SpatialExperiment'
 (spe <- SpatialExperiment(
   assays = list(counts = assay(sce)),
@@ -49,11 +54,11 @@ dim(xyz)
   colData = DataFrame(xyz),
   spatialCoordsNames = c("pxl_col_in_fullres", "pxl_row_in_fullres"),
   imgData = img,
-  sample_id = "crc"))
+  sample_id = "crc16um"))
 
 spe
 
 # save spe as .rds file
-saveRDS(spe, file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC/outputs/spe_humanCRC_16um.rds")
+saveRDS(spe, file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC_16um/outputs/spe_humanCRC16.rds")
 
 

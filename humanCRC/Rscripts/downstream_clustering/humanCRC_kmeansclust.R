@@ -78,6 +78,9 @@ table(km_hvgs$cluster)
 # kmeans cluster assignments
 km_hvg_11clust <- km_hvgs$cluster
 
+length(km_hvg_11clust)
+ncol(spe)
+
 # store cluster label in column 'label' in colData
 colLabels(spe) <- factor(km_hvg_11clust)
 

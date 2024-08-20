@@ -1,0 +1,22 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# name
+#$ -N CRC16_SpatialDE2
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# number of cores
+#$ -pe omp 16
+
+# memory per core
+#$ -l mem_per_core=16G
+
+module load python3/3.10.12
+python humanCRC16_runSpatialDE2.py

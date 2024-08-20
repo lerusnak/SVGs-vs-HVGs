@@ -61,13 +61,13 @@ VGdf_list <- list(HVGs_df, SPARKX_df)
 
 # match clusters to ground truth layers for each method
 
-match_HVGs <- c(1, 3, 5, 4, 2)
-coldata_out$HVGs$label <- factor(
-  coldata_out$HVGs$label, levels = match_HVGs)
+#match_HVGs <- c(1, 3, 5, 4, 2)
+#coldata_out$HVGs$label <- factor(
+#  coldata_out$HVGs$label, levels = match_HVGs)
 
-match_SPARKX <- c(5, 1, 4, 3, 2)
-coldata_out$SPARKX$label <- factor(
-  coldata_out$SPARKX$label, levels = match_SPARKX)
+#match_SPARKX <- c(5, 1, 4, 3, 2)
+#coldata_out$SPARKX$label <- factor(
+#  coldata_out$SPARKX$label, levels = match_SPARKX)
 
 
 

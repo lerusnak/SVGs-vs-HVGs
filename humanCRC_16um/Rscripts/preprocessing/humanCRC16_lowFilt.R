@@ -16,7 +16,7 @@ library(ggspavis)
 # Load Data #
 #############
 
-spe <- readRDS(file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC/outputs/spe_humanCRC_16um.rds")
+spe <- readRDS(file = "/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC_16um/outputs/spe_humanCRC16.rds")
 dim(spe)
 
 ###############
@@ -44,32 +44,25 @@ dim(spe)
 
 
 # filter low-expressed genes
-is_low <- rowSums(counts(spe)) <= 10000
+is_low <- rowSums(counts(spe)) <= 100
 table(is_low)
 
 spe <- spe[!is_low,]
 
 dim(spe)
 
-spe <- spe[, colSums(counts(spe)) > 0]
+# removing bins with zero counts
+zero_bins <- colSums(counts(spe)) <= 0
+table(zero_bins)
 
-# QC 
-
-spe <- addPerCellQC(spe, subsets = list(mito = is_mito))
-head(colData(spe))
-
-hist(colData(spe)$sum, breaks = 20)
-
+spe <- spe[, !zero_bins]
+dim(spe)
 
 # Normalization 
 
 # calculate log-transformed normalized counts using scran package
 # using library size normalization
 spe <- computeLibraryFactors(spe)
-
-assay(spe)[1:10, 1:10]
-table(colData(spe)$sizeFactor >= 0)
-anyMissing(colData(spe)$sizeFactor)
 
 spe <- logNormCounts(spe)
 
@@ -82,9 +75,6 @@ spe
 # Save as .rds data #
 #####################
 
-fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC/outputs/spe_humanCRC_lowFilt.rds")
+fn <- here("/projectnb/weber-lr/SVGs-vs-HVGs/humanCRC_16um/outputs/spe_humanCRC16_lowFilt.rds")
 saveRDS(spe, file = fn)
-
-
-
 

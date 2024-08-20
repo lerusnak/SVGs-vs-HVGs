@@ -1,0 +1,19 @@
+#!/bin/bash -l
+
+# project
+#$ -P weber-lr
+
+# job name
+#$ -N CRC16_MorI
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# memory per core
+#$ -l mem_per_core=60G
+
+module load R/4.4.0
+Rscript humanCRC16_runMorI.R

@@ -1,0 +1,25 @@
+#!/bin/bash -l
+
+#Time limit
+#$ -l h_rt=24:00:00
+
+# project
+#$ -P weber-lr
+
+# job name
+#$ -N CRC16_nnSVG
+
+# combine errors and outs
+#$ -j y
+
+# email
+#$ -m ea
+
+# number of cores
+#$ -pe omp 10
+
+# memory per core
+#$ -l mem_per_core=16G
+
+module load R/4.4.0
+Rscript humanCRC16_runnnSVG.R
