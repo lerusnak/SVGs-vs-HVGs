@@ -153,10 +153,10 @@ ari_SPARKX_10
 
 # match clusters to ground truth layers for each method
 
-match_HVGs <- c(7,12,2,8,4,10,1,15,9,6,11,3,13,14,5)
+match_HVGs <- c(7,12,2,8,4,9,1,15,10,6,11,3,13,14,5)
 coldata_out$HVGs$label_k15 <- factor(
   coldata_out$HVGs$label_k15, levels = match_HVGs)
-match_SPARKX <- c(15,10,5,1,6,3,11,9,13,7,12,8,14,2,4)
+match_SPARKX <- c(15,10,5,1,6,4,11,9,13,12,8,7,14,2,3)
 coldata_out$SPARKX$label_k15 <- factor(
   coldata_out$SPARKX$label_k15, levels = match_SPARKX)
 
@@ -205,9 +205,12 @@ ari_SPARKX_15
 
 # match clusters to ground truth layers for each method
 
-#match_HVGs <- c(3, 1, 2, 4, 5)
-#coldata_out$HVGs$label_k5 <- factor(
-#  coldata_out$HVGs$label_k5, levels = match_HVGs)
+match_HVGs <- c(5,7,13,4,1,6,2,8,9,18,11,12,15,14,16,3,17,10,19,20)
+coldata_out$HVGs$label_k20 <- factor(
+  coldata_out$HVGs$label_k20, levels = match_HVGs)
+match_SPARKX <- c(8,12,3,4,13,6,15,18,9,10,2,11,19,14,7,16,17,5,1,20)
+coldata_out$SPARKX$label_k20 <- factor(
+  coldata_out$SPARKX$label_k20, levels = match_SPARKX)
 
 VGs_df <- list()
 
